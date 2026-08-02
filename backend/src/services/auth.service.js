@@ -180,10 +180,21 @@ export async function loginUser({
     );
   }
 
-  const passwordIsValid = await verifyPassword(
-    password,
-    user.password_hash
+ if (!password) {
+  throw new AppError("Password is required", 400);
+}
+
+if (!user.password_hash) {
+  throw new AppError(
+    "Password hash is missing for this account",
+    500
   );
+}
+
+const passwordIsValid = await verifyPassword(
+  password,
+  user.password_hash
+);
 
   if (!passwordIsValid) {
     throw new AppError(

@@ -26,7 +26,19 @@ export async function findUserByUsername(username) {
 
 export async function findUserByEmailOrUsername(identifier) {
   const query = `
-    SELECT *
+    SELECT
+      user_id,
+      email,
+      username,
+      password_hash,
+      role,
+      account_status,
+      email_verified,
+      two_factor_enabled,
+      two_factor_method,
+      last_login_at,
+      created_at,
+      updated_at
     FROM users
     WHERE LOWER(email) = LOWER($1)
        OR LOWER(username) = LOWER($1)
@@ -34,6 +46,7 @@ export async function findUserByEmailOrUsername(identifier) {
   `;
 
   const { rows } = await pool.query(query, [identifier]);
+
   return rows[0] || null;
 }
 
@@ -180,6 +193,18 @@ export async function updateTwoFactorSettings(
     enabled,
     enabled ? method : null
   ]);
+
+  return rows[0] || null;
+}
+
+export async function deleteUser(userId) {
+  const query = `
+    DELETE FROM users
+    WHERE user_id = $1
+    RETURNING *
+  `;
+
+  const { rows } = await pool.query(query, [userId]);
 
   return rows[0] || null;
 }

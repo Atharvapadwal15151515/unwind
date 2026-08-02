@@ -37,6 +37,7 @@ export async function createProfile({
   ];
 
   const { rows } = await pool.query(query, values);
+
   return rows[0];
 }
 
@@ -49,6 +50,7 @@ export async function findProfileByUserId(userId) {
   `;
 
   const { rows } = await pool.query(query, [userId]);
+
   return rows[0] || null;
 }
 
@@ -58,9 +60,7 @@ export async function updateProfile(userId, updates) {
     displayName,
     dateOfBirth,
     gender,
-    occupationType,
-    profileImageUrl,
-    profileImagePublicId
+    occupationType
   } = updates;
 
   const query = `
@@ -71,8 +71,6 @@ export async function updateProfile(userId, updates) {
       date_of_birth = COALESCE($4, date_of_birth),
       gender = COALESCE($5, gender),
       occupation_type = COALESCE($6, occupation_type),
-      profile_image_url = COALESCE($7, profile_image_url),
-      profile_image_public_id = COALESCE($8, profile_image_public_id),
       updated_at = NOW()
     WHERE user_id = $1
     RETURNING *
@@ -84,11 +82,52 @@ export async function updateProfile(userId, updates) {
     displayName ?? null,
     dateOfBirth ?? null,
     gender ?? null,
-    occupationType ?? null,
-    profileImageUrl ?? null,
-    profileImagePublicId ?? null
+    occupationType ?? null
   ];
 
   const { rows } = await pool.query(query, values);
+
+  return rows[0] || null;
+}
+
+export async function updateProfileImage({
+  userId,
+  profileImageUrl,
+  profileImagePublicId
+}) {
+  const query = `
+    UPDATE user_profiles
+    SET
+      profile_image_url = $2,
+      profile_image_public_id = $3,
+      updated_at = NOW()
+    WHERE user_id = $1
+    RETURNING *
+  `;
+
+  const values = [
+    userId,
+    profileImageUrl,
+    profileImagePublicId
+  ];
+
+  const { rows } = await pool.query(query, values);
+
+  return rows[0] || null;
+}
+
+export async function removeProfileImage(userId) {
+  const query = `
+    UPDATE user_profiles
+    SET
+      profile_image_url = NULL,
+      profile_image_public_id = NULL,
+      updated_at = NOW()
+    WHERE user_id = $1
+    RETURNING *
+  `;
+
+  const { rows } = await pool.query(query, [userId]);
+
   return rows[0] || null;
 }

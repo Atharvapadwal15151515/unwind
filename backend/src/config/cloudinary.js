@@ -1,4 +1,9 @@
 import "dotenv/config";
+
+console.log("Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
+console.log("API Key:", process.env.CLOUDINARY_API_KEY);
+console.log("API Secret:", process.env.CLOUDINARY_API_SECRET ? "Loaded" : "Missing");
+
 import { v2 as cloudinary } from "cloudinary";
 
 const requiredVariables = [
@@ -9,9 +14,7 @@ const requiredVariables = [
 
 for (const variable of requiredVariables) {
   if (!process.env[variable]) {
-    throw new Error(
-      `${variable} is missing from environment variables`
-    );
+    throw new Error(`${variable} is missing`);
   }
 }
 

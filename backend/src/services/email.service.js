@@ -290,3 +290,257 @@ If you did not create this account, ignore this email.
     textContent
   });
 }
+
+export async function sendPasswordResetEmail({
+  userId,
+  recipientEmail,
+  recipientName = null,
+  otp,
+  resetToken
+}) {
+  const resetUrl =
+    `${process.env.FRONTEND_URL}/reset-password` +
+    `?userId=${encodeURIComponent(userId)}` +
+    `&token=${encodeURIComponent(resetToken)}`;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        />
+      </head>
+
+      <body
+        style="
+          margin: 0;
+          padding: 30px;
+          background-color: #f5f7fb;
+          font-family: Arial, sans-serif;
+          color: #242424;
+        "
+      >
+        <div
+          style="
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 32px;
+            background-color: #ffffff;
+            border-radius: 12px;
+          "
+        >
+          <h2 style="margin-top: 0;">
+            Reset your UNWIND password
+          </h2>
+
+          <p>
+            ${
+              recipientName
+                ? `Hello ${recipientName},`
+                : "Hello,"
+            }
+          </p>
+
+          <p>
+            We received a request to reset your password.
+            Use this OTP:
+          </p>
+
+          <div
+            style="
+              margin: 28px 0;
+              padding: 16px;
+              text-align: center;
+              font-size: 32px;
+              font-weight: bold;
+              letter-spacing: 8px;
+              background-color: #f2effa;
+              border-radius: 8px;
+            "
+          >
+            ${otp}
+          </div>
+
+          <p>
+            You can also reset your password using the
+            button below.
+          </p>
+
+          <div
+            style="
+              margin: 30px 0;
+              text-align: center;
+            "
+          >
+            <a
+              href="${resetUrl}"
+              style="
+                display: inline-block;
+                padding: 13px 24px;
+                background-color: #6750a4;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: bold;
+              "
+            >
+              Reset Password
+            </a>
+          </div>
+
+          <p>
+            The OTP expires in 10 minutes. The reset link
+            expires in 30 minutes.
+          </p>
+
+          <p>
+            If you did not request a password reset, ignore
+            this email. Your password will remain unchanged.
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const textContent = `
+Reset your UNWIND password.
+
+Your password reset OTP is: ${otp}
+
+You can also reset your password using this link:
+${resetUrl}
+
+The OTP expires in 10 minutes.
+The reset link expires in 30 minutes.
+
+If you did not request this reset, ignore this email.
+  `.trim();
+
+  return sendTransactionalEmail({
+    userId,
+    recipientEmail,
+    recipientName,
+    emailType: "password_reset",
+    subject: "Reset your UNWIND password",
+    htmlContent,
+    textContent
+  });
+}
+/**
+ * Send Journal PIN reset OTP.
+ */
+export async function sendJournalPinResetEmail({
+  userId,
+  recipientEmail,
+  recipientName = null,
+  otp
+}) {
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        />
+      </head>
+
+      <body
+        style="
+          margin: 0;
+          padding: 30px;
+          background-color: #f5f7fb;
+          font-family: Arial, sans-serif;
+          color: #242424;
+        "
+      >
+        <div
+          style="
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 32px;
+            background-color: #ffffff;
+            border-radius: 12px;
+          "
+        >
+          <h2 style="margin-top: 0;">
+            Reset your UNWIND Journal PIN
+          </h2>
+
+          <p>
+            ${
+              recipientName
+                ? `Hello ${recipientName},`
+                : "Hello,"
+            }
+          </p>
+
+          <p>
+            We received a request to reset your
+            Journal PIN. Use the OTP below to
+            verify your identity:
+          </p>
+
+          <div
+            style="
+              margin: 28px 0;
+              padding: 16px;
+              text-align: center;
+              font-size: 32px;
+              font-weight: bold;
+              letter-spacing: 8px;
+              background-color: #f2effa;
+              border-radius: 8px;
+            "
+          >
+            ${otp}
+          </div>
+
+          <p>
+            This OTP expires in 10 minutes.
+          </p>
+
+          <p>
+            After verification, you will be able
+            to create a new Journal PIN.
+          </p>
+
+          <p>
+            If you did not request this reset,
+            ignore this email. Your Journal PIN
+            will remain unchanged.
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const textContent = `
+Reset your UNWIND Journal PIN.
+
+Your Journal PIN reset OTP is: ${otp}
+
+This OTP expires in 10 minutes.
+
+After verification, you will be able to create a new Journal PIN.
+
+If you did not request this reset, ignore this email.
+Your Journal PIN will remain unchanged.
+  `.trim();
+
+  return sendTransactionalEmail({
+    userId,
+    recipientEmail,
+    recipientName,
+    emailType:
+      "journal_pin_reset",
+    subject:
+      "Reset your UNWIND Journal PIN",
+    htmlContent,
+    textContent
+  });
+}

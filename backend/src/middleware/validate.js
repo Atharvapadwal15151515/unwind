@@ -1,15 +1,39 @@
 export function validate(schema) {
   return async function validationMiddleware(req, res, next) {
     try {
-      const validatedData = await schema.parseAsync({
-        body: req.body,
-        params: req.params,
-        query: req.query
-      });
+      let validatedData;
+
+      // Complete Zod schema:
+      // z.object({ body, params, query })
+      if (typeof schema?.parseAsync === "function") {
+        validatedData = await schema.parseAsync({
+          body: req.body,
+          params: req.params,
+          query: req.query
+        });
+      } else {
+        // Separate schemas:
+        // { body: ..., params: ..., query: ... }
+        validatedData = {
+          body: schema?.body
+            ? await schema.body.parseAsync(req.body)
+            : req.body,
+
+          params: schema?.params
+            ? await schema.params.parseAsync(req.params)
+            : req.params,
+
+          query: schema?.query
+            ? await schema.query.parseAsync(req.query)
+            : req.query
+        };
+      }
 
       req.body = validatedData.body;
       req.params = validatedData.params;
-      req.query = validatedData.query;
+
+      // Express 5 exposes req.query through a getter.
+      req.validatedQuery = validatedData.query;
 
       next();
     } catch (error) {

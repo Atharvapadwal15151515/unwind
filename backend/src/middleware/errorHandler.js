@@ -38,7 +38,22 @@ export function errorHandler(error, req, res, next) {
       message: "Token expired"
     });
   }
+if (error.code === "LIMIT_FILE_SIZE") {
+  return res.status(400).json({
+    success: false,
+    message: "Profile image cannot exceed 5 MB"
+  });
+}
 
+if (
+  error.message ===
+  "Only JPEG, PNG and WebP images are allowed"
+) {
+  return res.status(400).json({
+    success: false,
+    message: error.message
+  });
+}
   return res.status(500).json({
     success: false,
     message:
